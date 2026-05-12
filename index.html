@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeamFlow — Task Management</title>
+  <link rel="stylesheet" href="static/style.css" />
+  <!-- Google Fonts: Syne (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Lucide icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">⬡</span>
+    <span class="logo-text">TeamFlow</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-view="dashboard">
+      <i data-lucide="layout-dashboard"></i> Dashboard
+    </a>
+    <a href="#" class="nav-item" data-view="tasks">
+      <i data-lucide="check-square"></i> All Tasks
+    </a>
+    <a href="#" class="nav-item" data-view="members">
+      <i data-lucide="users"></i> Team Members
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+      <i data-lucide="moon" id="themeIcon"></i>
+      <span id="themeLabel">Dark Mode</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-wrapper">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Toggle sidebar">
+      <i data-lucide="menu"></i>
+    </button>
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <div class="search-wrap">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search tasks…" />
+      </div>
+      <button class="btn btn-primary" id="openModalBtn">
+        <i data-lucide="plus"></i> New Task
+      </button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD VIEW -->
+  <main class="content" id="viewDashboard">
+
+    <!-- Stats Row -->
+    <section class="stats-grid">
+      <div class="stat-card" data-color="all">
+        <div class="stat-icon"><i data-lucide="clipboard-list"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="statTotal">0</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+      </div>
+      <div class="stat-card" data-color="pending">
+        <div class="stat-icon"><i data-lucide="clock"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="statPending">0</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+      <div class="stat-card" data-color="inprogress">
+        <div class="stat-icon"><i data-lucide="loader"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="statInProgress">0</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+      </div>
+      <div class="stat-card" data-color="completed">
+        <div class="stat-icon"><i data-lucide="check-circle-2"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="statCompleted">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <div class="filter-pills">
+        <button class="pill active" data-filter="all">All</button>
+        <button class="pill" data-filter="Pending">Pending</button>
+        <button class="pill" data-filter="In Progress">In Progress</button>
+        <button class="pill" data-filter="Completed">Completed</button>
+      </div>
+      <div class="priority-filter">
+        <select id="priorityFilter">
+          <option value="all">All Priorities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Task Cards Grid -->
+    <section class="tasks-grid" id="tasksGrid">
+      <!-- JS renders cards here -->
+    </section>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">📋</div>
+      <h3>No tasks yet</h3>
+      <p>Click <strong>New Task</strong> to get started.</p>
+    </div>
+
+  </main>
+
+  <!-- MEMBERS VIEW -->
+  <main class="content hidden" id="viewMembers">
+    <h2 class="section-heading">Team Members</h2>
+    <div class="members-grid" id="membersGrid"></div>
+  </main>
+
+</div><!-- /main-wrapper -->
+
+<!-- ===== ADD / EDIT TASK MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="taskModal">
+    <div class="modal-header">
+      <h2 id="modalTitle">New Task</h2>
+      <button class="modal-close" id="closeModalBtn"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="taskId" />
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="taskTitle">Task Title <span class="req">*</span></label>
+          <input type="text" id="taskTitle" placeholder="e.g. Design homepage mockup" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="taskDescription">Description</label>
+          <textarea id="taskDescription" rows="3" placeholder="Describe the task…"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row two-col">
+        <div class="form-group">
+          <label for="taskAssignee">Assign To <span class="req">*</span></label>
+          <input type="text" id="taskAssignee" placeholder="Team member name" required />
+        </div>
+        <div class="form-group">
+          <label for="taskDueDate">Due Date</label>
+          <input type="date" id="taskDueDate" />
+        </div>
+      </div>
+
+      <div class="form-row two-col">
+        <div class="form-group">
+          <label for="taskStatus">Status</label>
+          <select id="taskStatus">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskPriority">Priority</label>
+          <select id="taskPriority">
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelModalBtn">Cancel</button>
+      <button class="btn btn-primary" id="saveTaskBtn">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DELETE CONFIRM MODAL ===== -->
+<div class="modal-overlay" id="deleteOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Delete Task?</h2>
+      <button class="modal-close" id="closeDeleteBtn"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <p>This action cannot be undone. Are you sure you want to delete <strong id="deleteTaskName"></strong>?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelDeleteBtn">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script src="static/app.js"></script>
+</body>
+</html>
